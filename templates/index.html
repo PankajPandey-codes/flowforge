@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-logo-wrap">
+      <svg width="30" height="30" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M19 2 A17 17 0 1 0 19 36 A17 17 0 1 0 19 2 Z
+                 M19 9 A10 10 0 1 1 19 29 A10 10 0 1 1 19 9 Z" fill="#4A90D9"/>
+        <path d="M28 4 L34 4 L34 11 L28 4 Z" fill="#2B5C8A"/>
+      </svg>
+      <span class="header-logo">FlowForge</span>
+    </div>
+    <div class="header-sep"></div>
+    <span class="header-title">HTTP Capture &amp; Test Artifact Generator</span>
+  </div>
+</header>
+
+<!-- Progress bar -->
+<div class="progress-bar-container">
+  <div class="progress-stages">
+    <div class="stage-pill" id="pill-1" data-stage="1">1&nbsp; Setup</div>
+    <div class="stage-divider"></div>
+    <div class="stage-pill" id="pill-2" data-stage="2">2&nbsp; Capturing</div>
+    <div class="stage-divider"></div>
+    <div class="stage-pill" id="pill-3" data-stage="3">3&nbsp; Map &amp; Review</div>
+    <div class="stage-divider"></div>
+    <div class="stage-pill" id="pill-4" data-stage="4">4&nbsp; Complete</div>
+  </div>
+</div>
+
+<main class="main-content">
+
+  <!-- ===== STAGE 1: Setup ===== -->
+  <section class="stage" id="stage-1">
+    <div class="stage-eyebrow">Configuration</div>
+    <h2 class="stage-title">Setup</h2>
+    <div class="warning-banner hidden" id="llm-status-banner"></div>
+
+    <div class="card" style="padding:12px 16px">
+      <label class="field-label" style="margin-bottom:8px">LLM Auth Method</label>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:500;cursor:pointer">
+          <input type="radio" name="auth-mode" id="auth-mode-auto" value="auto" checked> Auto (API key → CLI fallback)
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:500;cursor:pointer">
+          <input type="radio" name="auth-mode" id="auth-mode-api-key" value="api_key"> Anthropic API key
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:500;cursor:pointer">
+          <input type="radio" name="auth-mode" id="auth-mode-cli" value="cli"> Claude CLI (SSO login)
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <label class="field-label">Upload apiInputs CSV</label>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="csv-file" accept=".csv" class="file-input">
+        <div class="upload-hint" id="upload-hint">Click to upload your apiInputs CSV</div>
+        <div class="upload-confirm" id="upload-confirm" style="display:none"></div>
+      </div>
+      <div style="margin-top:14px">
+        <label class="early-automation-label">
+          <input type="checkbox" id="append-mode">
+          <span>APPEND TO EXISTING API <span style="font-weight:500;text-transform:none;letter-spacing:0">(adding new test cases to existing artifacts)</span></span>
+        </label>
+      </div>
+      <div id="append-confirm-panel" style="display:none;margin-top:10px;padding:12px 14px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+        <div style="font-size:.78rem;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Found existing files &mdash; please confirm:</div>
+        <ul id="append-file-list" style="margin:0 0 12px;padding-left:18px;font-size:.82rem;color:var(--body);line-height:2;font-weight:500"></ul>
+        <div style="display:flex;align-items:center;gap:10px">
+          <label class="field-label" style="margin-bottom:0;white-space:nowrap;font-size:.8rem">Starting from case number:</label>
+          <input type="number" id="start-from-case" class="text-input" min="1" value="1" style="width:76px;padding:5px 8px">
+        </div>
+      </div>
+      <div id="append-error-msg" style="display:none;margin-top:10px;font-size:.82rem;font-weight:600;color:#ef4444"></div>
+    </div>
+
+    <div class="card">
+      <div class="form-grid form-grid-3">
+        <div class="form-field">
+          <label class="field-label" for="api-name">API Name</label>
+          <input type="text" id="api-name" class="text-input" placeholder="e.g. CreateLoanAccount">
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="module">Module</label>
+          <input type="text" id="module" class="text-input" list="module-options" placeholder="e.g. Loan Creation" autocomplete="off">
+          <datalist id="module-options"></datalist>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="manifest">Manifest</label>
+          <select id="manifest" class="select-input">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="owner">Person</label>
+          <input type="text" id="owner" class="text-input" list="person-options" placeholder="e.g. Jane" autocomplete="off">
+          <datalist id="person-options"></datalist>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="business-function">Business Function</label>
+          <input type="text" id="business-function" class="text-input" list="business-function-options" placeholder="e.g. Loan Management" autocomplete="off">
+          <datalist id="business-function-options"></datalist>
+          <label class="early-automation-label">
+            <input type="checkbox" id="early-automation">
+            <span>EARLY AUTOMATION <span style="font-weight:500;text-transform:none;letter-spacing:0">(backend isn't developed yet)</span></span>
+          </label>
+        </div>
+        <div class="form-field">
+          <label class="field-label" for="capture-host">Target Host <span style="font-weight:500;color:var(--body);text-transform:none;letter-spacing:0">(only capture traffic from this host)</span></label>
+          <input type="text" id="capture-host" class="text-input" value="" placeholder="e.g. dev.example.internal">
+        </div>
+      </div>
+    </div>
+
+    <div id="spec-upload-section" style="display:none">
+      <div class="card" style="margin-top:0">
+        <label class="field-label">Upload OpenAPI 3.0 Spec <span style="font-weight:500;text-transform:none;letter-spacing:0">(optional — JSON or YAML)</span></label>
+        <div class="upload-zone" id="spec-upload-zone">
+          <input type="file" id="spec-file" accept=".json,.yaml,.yml" class="file-input">
+          <div class="upload-hint" id="spec-upload-hint">Click to upload spec file</div>
+          <div class="upload-confirm" id="spec-upload-confirm" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-start-capture">Start Capture</button>
+    </div>
+  </section>
+
+  <!-- ===== STAGE 2: Capturing ===== -->
+  <section class="stage hidden" id="stage-2">
+    <div class="stage-eyebrow">Proxy Capture</div>
+    <h2 class="stage-title">Capturing Traffic</h2>
+
+    <div class="capture-split">
+      <div class="card capture-status-card">
+        <div class="capture-indicator">
+          <span class="pulse-dot"></span>
+          <span class="capture-label">Live</span>
+        </div>
+        <div class="capture-count" id="capture-count">0 requests captured</div>
+        <div style="margin-top:10px;font-size:.8rem;color:var(--mid);font-weight:500">
+          Listening on 127.0.0.1:8080
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+
+        <!-- Chrome card -->
+        <div class="card" style="display:flex;flex-direction:column;gap:12px">
+          <div class="stage-eyebrow" style="margin-bottom:0">Chrome</div>
+          <p style="font-size:.84rem;color:var(--mid);font-weight:500;line-height:1.6;margin:0">
+            A dedicated Chrome window opens automatically with the proxy pre-configured — no admin or extensions needed.
+          </p>
+          <ol style="margin:0;padding-left:18px;font-size:.82rem;color:var(--body);line-height:1.9;font-weight:500">
+            <li>A new Chrome window opens — all traffic routes through the proxy</li>
+            <li>Do your transaction in that window</li>
+            <li>Return here and click <strong>Stop Capture</strong> — the window closes automatically</li>
+          </ol>
+          <p style="font-size:.76rem;color:var(--mid);margin:0;line-height:1.5">
+            First time only: visit <code style="font-size:.74rem">http://mitm.it</code> in the capture window to trust the mitmproxy CA certificate (needed for HTTPS).
+          </p>
+        </div>
+
+        <!-- Postman card -->
+        <div class="card" style="display:flex;flex-direction:column;gap:12px">
+          <div class="stage-eyebrow" style="margin-bottom:0">Postman</div>
+          <ol style="margin:0;padding-left:18px;font-size:.82rem;color:var(--body);line-height:1.9;font-weight:500">
+            <li>Preferences → <strong>Proxy</strong> → enable, set <code style="font-size:.76rem">127.0.0.1 : 8080</code></li>
+            <li>Preferences → <strong>General</strong> → disable SSL certificate verification</li>
+            <li>Send requests normally — they appear in the captured count</li>
+          </ol>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-danger" id="btn-stop-capture">
+        <span id="stop-spinner" class="spinner hidden"></span>
+        Stop Capture
+      </button>
+    </div>
+  </section>
+
+  <!-- ===== STAGE 3: Map & Review ===== -->
+  <section class="stage hidden" id="stage-3">
+    <div class="stage-eyebrow">Mapping &amp; Review</div>
+    <h2 class="stage-title">Map &amp; Review</h2>
+    <div class="warning-banner hidden" id="mapping-warning"></div>
+
+    <div class="card preset-card">
+      <label class="field-label">Default commonIgnore Preset</label>
+      <div class="preset-row">
+        <select id="preset-select" class="select-input">
+          <option value="standard_ignore_list">Standard Preset</option>
+          <option value="no_commonignore">No CommonIgnore</option>
+        </select>
+        <button class="btn btn-secondary" id="btn-apply-preset">Apply to All</button>
+        <button class="btn btn-secondary" id="btn-retry-mapping">
+          <span id="retry-spinner" class="spinner spinner-dark hidden"></span>
+          Retry Mapping
+        </button>
+        <button class="btn btn-secondary hidden" id="btn-pause-mapping" style="color:#ef4444;border-color:#ef4444">Pause</button>
+        <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:600;white-space:nowrap">
+          From TC#
+          <input type="number" id="retry-from-tc" class="text-input" min="1" value="1" style="width:64px;padding:4px 6px">
+        </label>
+        <span class="retry-status" id="retry-status"></span>
+      </div>
+      <div class="preset-preview" id="preset-preview"></div>
+    </div>
+
+    <!-- Normal capture mode table -->
+    <div class="card" id="mapping-card">
+      <table class="mapping-table" id="mapping-table">
+        <thead>
+          <tr>
+            <th style="width:44px">#</th>
+            <th style="width:24%">Test Objective</th>
+            <th>Mapped API</th>
+            <th style="width:92px">Confidence</th>
+            <th style="width:108px">Response Code</th>
+            <th style="width:120px">Test Stresser Flag</th>
+          </tr>
+        </thead>
+        <tbody id="mapping-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Early automation mode table (hidden until early mode active) -->
+    <div class="card" id="ea-mapping-card" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span class="ea-badge ea-badge-spec">SPEC</span> skeleton — review red fields &nbsp;|&nbsp;
+        <span class="ea-badge ea-badge-existing">EXISTING</span> real data from suite &nbsp;|&nbsp;
+        <span class="ea-badge ea-badge-manual">MANUAL</span> no match — fill manually
+      </div>
+      <table class="mapping-table" id="ea-mapping-table">
+        <thead>
+          <tr>
+            <th style="width:44px">#</th>
+            <th style="width:22%">Test Objective</th>
+            <th style="width:110px">Method</th>
+            <th>Mapped API Path</th>
+            <th style="width:90px">Source</th>
+            <th style="width:108px">Response Code</th>
+            <th style="width:100px">Test Stresser</th>
+          </tr>
+        </thead>
+        <tbody id="ea-mapping-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-confirm">Done &mdash; Generate Artifacts</button>
+    </div>
+  </section>
+
+  <!-- ===== STAGE 4: Complete ===== -->
+  <section class="stage hidden" id="stage-4">
+    <div class="stage-eyebrow">Done</div>
+    <h2 class="stage-title">Artifacts Generated</h2>
+
+    <div class="card" id="stats-card">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="artifacts-split">
+      <div class="card" id="files-card">
+        <h3 class="section-label">Generated Files</h3>
+        <ul class="file-list" id="file-list"></ul>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="stage4-callout">
+          <div class="stage-eyebrow" style="margin-bottom:6px">Next Step</div>
+          <p>Run <code>/git-operations</code> in Claude Code to push these files and raise a PR.</p>
+        </div>
+        <div class="stage4-callout" style="border-left-color:var(--mint)">
+          <div class="stage-eyebrow" style="margin-bottom:6px;color:var(--mint)">Before Raising PR</div>
+          <ol>
+            <li>Restore <strong>Golden DB</strong> to a clean state</li>
+            <li>Do a <strong>local run</strong> to confirm the new API passes end-to-end</li>
+            <li>Then run <code>/git-operations</code> to push and raise the PR</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
