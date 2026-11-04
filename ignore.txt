@@ -1,0 +1,23 @@
+# Capture ignore rules for tools/capture/mitm_addon.py.
+#
+# Blank lines and lines starting with # are ignored.
+# Every plain line is matched as a case-insensitive substring in the URL path.
+# Add or remove lines here to control which requests are skipped during capture.
+
+/assets
+/identity
+/picklist
+/token
+/globalsearch
+/loanWarnings
+/dataprocessor
+/getRateIndexForMissingRate
+/configflag
+/HOMEPAGE
+/tasks
+/countbystatus
+/gettaskforuser
+/listofloanaccountsbyborrower
+/getallfloatingrateskey
+/getFeeTemplate
+/channel
