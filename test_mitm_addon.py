@@ -61,7 +61,7 @@ def test_response_skips_disallowed_host(tmp_path, monkeypatch):
 def test_flows_file_is_created_with_owner_only_permissions(tmp_path, monkeypatch):
     """
     Captured flows contain real, unredacted request/response bodies from a
-    dev-environment banking transaction. STATE_FILE (server.py) is already
+    dev-environment transaction. STATE_FILE (server.py) is already
     locked down to 0o600 -- the flows file must match, not inherit whatever
     the process umask happens to leave it at.
     """

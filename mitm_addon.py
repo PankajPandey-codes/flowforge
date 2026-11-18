@@ -177,7 +177,7 @@ def response(flow: http.HTTPFlow) -> None:
     }
 
     try:
-        # Real, unredacted captured banking data -- lock the file down to
+        # Real, unredacted captured traffic -- lock the file down to
         # the owner like STATE_FILE (server.py) already is, rather than
         # leaving it at whatever the process umask happens to allow.
         fd = os.open(FLOWS_JSON, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)

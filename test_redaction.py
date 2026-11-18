@@ -32,7 +32,7 @@ def test_redact_value_preserves_identifier_fields_needed_to_disambiguate_calls()
     such call look identical to the LLM, and mapping accuracy collapsed to
     0% for every objective that relied on one of these generic GETs.
     Identifiers are reference keys, not PII/financial data -- they're
-    already visible in URLs, screenshots, and tickets across the org.
+    already visible in URLs, screenshots, and tickets anyway.
     """
     original = {
         "loanAccountNumber": "BH38559GH",

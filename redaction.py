@@ -2,7 +2,7 @@
 redaction.py — Mask captured request/response body values before they're
 embedded in a prompt sent to an external LLM API.
 
-Captured flows can contain real values from a dev-environment banking
+Captured flows can contain real values from a dev-environment
 transaction (borrower names, addresses, amounts). The mapping LLM mostly
 needs shape — field names, nesting, list length — to recognise which
 endpoint a call belongs to, so leaf values are replaced with type-preserving
@@ -18,7 +18,7 @@ it masked, the LLM has no way to tell which captured call belongs to which
 test case, and mapping accuracy collapses for every objective that relies
 on one of these generic reads. Identifiers are reference keys, not PII or
 financial data, and are already visible in URLs, tickets, and screenshots
-across the org -- redacting them protects nothing while breaking mapping.
+anyway -- redacting them protects nothing while breaking mapping.
 """
 
 import json
